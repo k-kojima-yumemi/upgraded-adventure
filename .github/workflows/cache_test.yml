@@ -1,0 +1,55 @@
+name: Cache Test
+
+on:
+    push
+
+jobs:
+    save_cache:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Get cache
+              id: cache
+              uses: actions/cache/restore@v3
+              with:
+                path: cache_date.txt
+                key: ${{ runner.os }}-date
+            - name: Create cache
+              if: steps.cache.outputs.cache-hit != 'true'
+              run: date > cache_date.txt
+            - name: Save cache
+              if: steps.cache.outputs.cache-hit != 'true'
+              uses: actions/cache/save@v3
+              with:
+                path: cache_date.txt
+                key: ${{ steps.cache.outputs.cache-primary-key }}
+
+    load_cache:
+        runs-on: ubuntu-latest
+        needs: save_cache
+        steps:
+            - name: Get cache
+              id: cache
+              uses: actions/cache/restore@v3
+              with:
+                path: cache_date.txt
+                key: ${{ runner.os }}-date
+            - name: Load data
+              run: |
+                echo "key: ${{ steps.cache.outputs.cache-primary-key }}"
+                echo "cache hit: ${{ steps.cache.outputs.cache-hit }}"
+                cat cache_date.txt
+    load_cache2:
+        runs-on: ubuntu-latest
+        needs: save_cache
+        steps:
+            -   name: Get cache
+                id: cache
+                uses: actions/cache/restore@v3
+                with:
+                    path: cache_date.txt
+                    key: ${{ runner.os }}-date
+            -   name: Load data
+                run: |
+                    echo "key: ${{ steps.cache.outputs.cache-primary-key }}"
+                    echo "cache hit: ${{ steps.cache.outputs.cache-hit }}"
+                    cat cache_date.txt
