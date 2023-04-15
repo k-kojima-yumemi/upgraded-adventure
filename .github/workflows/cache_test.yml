@@ -1,7 +1,6 @@
 name: Cache Test
 
-on:
-    push
+on: [ push ]
 
 jobs:
     save_cache:
@@ -13,6 +12,7 @@ jobs:
               with:
                 path: cache_date.txt
                 key: ${{ runner.os }}-date
+                lookup-only: true
             - name: Create cache
               if: steps.cache.outputs.cache-hit != 'true'
               run: date > cache_date.txt
