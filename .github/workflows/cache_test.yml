@@ -33,6 +33,7 @@ jobs:
               with:
                 path: cache_date.txt
                 key: ${{ runner.os }}-date
+                fail-on-cache-miss: true
             - name: Load data
               run: |
                 echo "key: ${{ steps.cache.outputs.cache-primary-key }}"
@@ -48,6 +49,7 @@ jobs:
                 with:
                     path: cache_date.txt
                     key: ${{ runner.os }}-date
+                    fail-on-cache-miss: true
             -   name: Load data
                 run: |
                     echo "key: ${{ steps.cache.outputs.cache-primary-key }}"
