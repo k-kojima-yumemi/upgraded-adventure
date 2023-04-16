@@ -1,0 +1,7 @@
+services:
+  app:
+    image: my-image-vim:latest
+    init: true
+    command: vim --version
+    build:
+      dockerfile: Test2.Dockerfile
