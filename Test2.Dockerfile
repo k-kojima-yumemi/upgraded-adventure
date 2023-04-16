@@ -10,4 +10,4 @@ apt-get clean
 rm -rf /var/lib/apt/lists/*
 EOF
 
-RUN python3 -c 'print("Hello world")' > /root/hello.txt
+RUN python3.10 -c 'print("Hello world")' > /root/hello.txt
