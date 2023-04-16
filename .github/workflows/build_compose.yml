@@ -19,15 +19,9 @@ jobs:
                     path: /tmp/docker-registry
                     key: docker-registry-${{ github.ref }}-${{ github.sha }}
                     lookup-only: true
-            -
-                name: Check output
-                run: |
-                    echo "${{ steps.cache.outputs.cache-hit }}"
-                    echo "${{ fromJson(steps.cache.outputs.cache-hit) }}"
-                    echo "${{ !fromJson(steps.cache.outputs.cache-hit) }}"
             -   
                 name: Cache Docker Build Cache
-                if: ${{ !fromJson(steps.cache.outputs.cache-hit) }}
+                if: steps.cache.outputs.cache-hit != 'true'
                 uses: actions/cache@v3
                 with:
                     path: /tmp/.buildx-cache
@@ -37,7 +31,7 @@ jobs:
                         docker-build-cache-
             - 
                 name: Get Cache of Docker Registry
-                if: ${{ !fromJson(steps.cache.outputs.cache-hit) }}
+                if: steps.cache.outputs.cache-hit != 'true'
                 uses: actions/cache/restore@v3
                 with:
                     path: /tmp/docker-registry
@@ -47,16 +41,16 @@ jobs:
                         docker-registry-
             - 
                 uses: docker/setup-buildx-action@v2
-                if: ${{ !fromJson(steps.cache.outputs.cache-hit) }}
+                if: steps.cache.outputs.cache-hit != 'true'
             - 
                 run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2
-                if: ${{ !fromJson(steps.cache.outputs.cache-hit) }}
+                if: steps.cache.outputs.cache-hit != 'true'
             -
                 run: npx wait-on tcp:5000
-                if: ${{ !fromJson(steps.cache.outputs.cache-hit) }}
+                if: steps.cache.outputs.cache-hit != 'true'
             -
                 name: Build images
-                if: ${{ !fromJson(steps.cache.outputs.cache-hit) }}
+                if: steps.cache.outputs.cache-hit != 'true'
                 uses: docker/bake-action@v2
                 with:
                     push: true
@@ -68,7 +62,7 @@ jobs:
                         "*.cache-to=type=local,dest=/tmp/.buildx-cache-new"
             -
                 name: Save Cache of Docker registory
-                if: ${{ !fromJson(steps.cache.outputs.cache-hit) }}
+                if: steps.cache.outputs.cache-hit != 'true'
                 uses: actions/cache/save@v3
                 with:
                     key: docker-registry-${{ github.ref }}-${{ github.sha }}
