@@ -1,0 +1,87 @@
+name: Compose 2
+
+on:
+    push:
+        paths:
+            - .github/workflows/build_compose.yml
+            - compose.test2.yml
+            - compose.test2.ci.yml
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - 
+                name: Check Cache of Docker Registry
+                id: check-registory-cache
+                uses: actions/cache/restore@v3
+                with:
+                    path: /tmp/docker-registry
+                    key: docker-registry-${{ github.ref }}-${{ github.sha }}
+                    lookup-only: true
+            -   
+                name: Cache Docker Build Cache
+                if: !fromJson(steps.check-registory-cache.outputs.cache-hit)
+                uses: actions/cache@v3
+                with:
+                    path: /tmp/.buildx-cache
+                    key: docker-build-cache-${{ github.ref }}-${{ github.sha }}
+                    restore-keys: |
+                        docker-build-cache-${{ github.ref }}
+                        docker-build-cache-
+            - 
+                name: Get Cache of Docker Registry
+                if: !fromJson(steps.check-registory-cache.outputs.cache-hit)
+                uses: actions/cache/restore@v3
+                with:
+                    path: /tmp/docker-registry
+                    key: docker-registry-${{ github.ref }}-${{ github.sha }}
+                    restore-keys: |
+                        docker-registry-${{ github.ref }}
+                        docker-registry-
+            - 
+                uses: docker/setup-buildx-action@v2
+                if: !fromJson(steps.check-registory-cache.outputs.cache-hit)
+            - 
+                run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2
+                if: !fromJson(steps.check-registory-cache.outputs.cache-hit)
+            -
+                run: npx wait-on tcp:5000
+                if: !fromJson(steps.check-registory-cache.outputs.cache-hit)
+            -
+                name: Build images
+                if: !fromJson(steps.check-registory-cache.outputs.cache-hit)
+                uses: docker/bake-action@v2
+                with:
+                    push: true
+                    files: |
+                        "compose.test2.yml"
+                        "compose.test2.ci.yml"
+                    set: |
+                        "*.cache-from=type=local,src=/tmp/.buildx-cache"
+                        "*.cache-to=type=local,dest=/tmp/.buildx-cache-new"
+            -
+                name: Save Cache of Docker registory
+                if: !fromJson(steps.check-registory-cache.outputs.cache-hit)
+                uses: actions/cache/save@v3
+                with:
+                    key: docker-registry-${{ github.ref }}-${{ github.sha }}
+                    path: "/tmp/.buildx-cache-new"
+
+    test:
+        runs-on: ubuntu-latest
+        steps:
+            - 
+                name: Get Cache of Docker Registry
+                id: get-registory-cache
+                uses: actions/cache/restore@v3
+                with:
+                    path: /tmp/docker-registry
+                    key: docker-registry-${{ github.ref }}-${{ github.sha }}
+                    fail-on-cache-miss: true
+            -
+                name: Start registory server
+                run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2
+            -
+                name: Compose up
+                run: docker compose up -f compose.test2.yml -f compose.test2.ci.yml
