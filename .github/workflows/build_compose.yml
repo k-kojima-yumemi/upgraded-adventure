@@ -10,14 +10,22 @@ on:
 jobs:
     build:
         runs-on: ubuntu-latest
+        outputs:
+            registry-cache-key: ${{ steps.cache.outputs.cache-primary-key }}
         steps:
+            - 
+                uses: actions/checkout@v3
+            - 
+                name: Get hash
+                id: get-hash
+                run: echo "build_hash=${{ hashFiles('compose.test2.yml', 'compose.test2.ci.yml', 'Test2.Dockerfile') }}" >> "$GITHUB_OUTPUT"
             - 
                 name: Check Cache of Docker Registry
                 id: cache
                 uses: actions/cache/restore@v3
                 with:
                     path: /tmp/docker-registry
-                    key: docker-registry-${{ github.ref }}-${{ github.sha }}
+                    key: docker-registry-${{ github.ref }}-${{ steps.get-hash.outputs.build_hash }}
                     lookup-only: true
             -   
                 name: Cache Docker Build Cache
@@ -25,7 +33,7 @@ jobs:
                 uses: actions/cache@v3
                 with:
                     path: /tmp/.buildx-cache
-                    key: docker-build-cache-${{ github.ref }}-${{ github.sha }}
+                    key: docker-build-cache-${{ github.ref }}-${{ steps.get-hash.outputs.build_hash }}
                     restore-keys: |
                         docker-build-cache-${{ github.ref }}
                         docker-build-cache-
@@ -35,7 +43,7 @@ jobs:
                 uses: actions/cache@v3
                 with:
                     path: /tmp/docker-registry
-                    key: docker-registry-${{ github.ref }}-${{ github.sha }}
+                    key: ${{ steps.cache.outputs.cache-primary-key }}
                     restore-keys: |
                         docker-registry-${{ github.ref }}
                         docker-registry-
@@ -60,9 +68,6 @@ jobs:
                 name: Call
                 if: steps.cache.outputs.cache-hit != 'true'
                 run: curl http://localhost:5000/v2/_catalog
-            - 
-                uses: actions/checkout@v3
-                if: steps.cache.outputs.cache-hit != 'true'
             -
                 name: Build images
                 if: steps.cache.outputs.cache-hit != 'true'
@@ -94,11 +99,14 @@ jobs:
                 uses: actions/cache/restore@v3
                 with:
                     path: /tmp/docker-registry
-                    key: docker-registry-${{ github.ref }}-${{ github.sha }}
+                    key: ${{ needs.build.outputs.registry-cache-key }}
                     fail-on-cache-miss: true
             -
                 name: Start registory server
                 run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2
+            - 
+                name: Compose pull
+                run: docker compose -f compose.test2.yml -f compose.test2.ci.yml pull
             -
                 name: Compose up
                 run: docker compose -f compose.test2.yml -f compose.test2.ci.yml up
