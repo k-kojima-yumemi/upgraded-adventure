@@ -87,6 +87,8 @@ jobs:
         needs: [build]
         steps:
             - 
+                uses: actions/checkout@v3
+            - 
                 name: Get Cache of Docker Registry
                 id: get-registory-cache
                 uses: actions/cache/restore@v3
