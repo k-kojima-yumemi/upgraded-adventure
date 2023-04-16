@@ -29,8 +29,8 @@ jobs:
             -
                 uses: docker/build-push-action@v4
                 with:
-                    cache-from: gha
-                    cache-to: gha
+                    cache-from: type=gha
+                    cache-to: type=gha,mode=max
                     tags: my-image-vim:latest
                     file: Test2.Dockerfile
                     load: true
