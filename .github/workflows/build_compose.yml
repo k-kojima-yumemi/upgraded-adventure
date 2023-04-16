@@ -65,7 +65,7 @@ jobs:
                 run: npx wait-on tcp:5000
                 if: steps.cache.outputs.cache-hit != 'true'
             -
-                name: Call
+                name: Call before build
                 if: steps.cache.outputs.cache-hit != 'true'
                 run: curl -sS http://localhost:5000/v2/_catalog
             -
@@ -86,6 +86,10 @@ jobs:
                 run: |
                     rm -rf /tmp/.buildx-cache
                     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
+            -
+                name: Call after build
+                if: steps.cache.outputs.cache-hit != 'true'
+                run: curl -sS http://localhost:5000/v2/_catalog
 
     test:
         runs-on: ubuntu-latest
