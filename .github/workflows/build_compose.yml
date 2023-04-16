@@ -48,6 +48,8 @@ jobs:
             -
                 run: npx wait-on tcp:5000
                 if: steps.cache.outputs.cache-hit != 'true'
+            - 
+                uses: actions/checkout@v3
             -
                 name: Build images
                 if: steps.cache.outputs.cache-hit != 'true'
