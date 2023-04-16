@@ -32,7 +32,7 @@ jobs:
             - 
                 name: Get Cache of Docker Registry
                 if: steps.cache.outputs.cache-hit != 'true'
-                uses: actions/cache/restore@v3
+                uses: actions/cache@v3
                 with:
                     path: /tmp/docker-registry
                     key: docker-registry-${{ github.ref }}-${{ github.sha }}
@@ -81,13 +81,6 @@ jobs:
                 run: |
                     rm -rf /tmp/.buildx-cache
                     mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-            -
-                name: Save Cache of Docker registory
-                if: steps.cache.outputs.cache-hit != 'true'
-                uses: actions/cache/save@v3
-                with:
-                    key: docker-registry-${{ github.ref }}-${{ github.sha }}
-                    path: /tmp/docker-registry
 
     test:
         runs-on: ubuntu-latest
@@ -106,4 +99,4 @@ jobs:
                 run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2
             -
                 name: Compose up
-                run: docker compose up -f compose.test2.yml -f compose.test2.ci.yml
+                run: docker compose -f compose.test2.yml -f compose.test2.ci.yml up
