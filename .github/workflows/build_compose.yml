@@ -19,6 +19,12 @@ jobs:
                     path: /tmp/docker-registry
                     key: docker-registry-${{ github.ref }}-${{ github.sha }}
                     lookup-only: true
+            -
+                name: Check output
+                run: |
+                    echo "${{ steps.check-registory-cache.outputs.cache-hit }}"
+                    echo "${{ fromJson(steps.check-registory-cache.outputs.cache-hit) }}"
+                    echo "${{ !fromJson(steps.check-registory-cache.outputs.cache-hit) }}"
             -   
                 name: Cache Docker Build Cache
                 if: ${{ !fromJson(steps.check-registory-cache.outputs.cache-hit) }}
