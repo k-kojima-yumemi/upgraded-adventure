@@ -42,6 +42,12 @@ jobs:
             - 
                 uses: docker/setup-buildx-action@v2
                 if: steps.cache.outputs.cache-hit != 'true'
+            -
+                name: Make directories
+                if: steps.cache.outputs.cache-hit != 'true'
+                run: |
+                    mkdir -p /tmp/docker-registry /tmp/.buildx-cache /tmp/.buildx-cache-new
+                    ls -al /tmp
             - 
                 run: docker run -d -p 5000:5000 --restart=always --name registry -v /tmp/docker-registry:/var/lib/registry registry:2
                 if: steps.cache.outputs.cache-hit != 'true'
@@ -51,7 +57,7 @@ jobs:
             -
                 name: Call
                 if: steps.cache.outputs.cache-hit != 'true'
-                run: curl http://localhost:5000/v2/
+                run: curl http://localhost:5000/v2/_catalog
             - 
                 uses: actions/checkout@v3
                 if: steps.cache.outputs.cache-hit != 'true'
