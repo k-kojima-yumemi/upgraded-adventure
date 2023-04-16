@@ -75,13 +75,19 @@ jobs:
                     set: |
                         "*.cache-from=type=local,src=/tmp/.buildx-cache"
                         "*.cache-to=type=local,dest=/tmp/.buildx-cache-new"
+            - 
+                name: Move build cache files
+                if: steps.cache.outputs.cache-hit != 'true'
+                run: |
+                    rm -rf /tmp/.buildx-cache
+                    mv /tmp/.buildx-cache-new /tmp/.buildx-cache
             -
                 name: Save Cache of Docker registory
                 if: steps.cache.outputs.cache-hit != 'true'
                 uses: actions/cache/save@v3
                 with:
                     key: docker-registry-${{ github.ref }}-${{ github.sha }}
-                    path: "/tmp/.buildx-cache-new"
+                    path: /tmp/docker-registry
 
     test:
         runs-on: ubuntu-latest
