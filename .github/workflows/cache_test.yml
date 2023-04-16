@@ -55,3 +55,19 @@ jobs:
                     echo "key: ${{ steps.cache.outputs.cache-primary-key }}"
                     echo "cache hit: ${{ steps.cache.outputs.cache-hit }}"
                     cat cache_date.txt
+    load_cache3:
+      runs-on: ubuntu-latest
+      needs: save_cache
+      steps:
+          -   name: Get cache
+              id: cache
+              uses: actions/cache/restore@v3
+              with:
+                  path: cache_date__tee.txt
+                  key: ${{ runner.os }}-date
+          -   name: Load data
+              run: |
+                  echo "key: ${{ steps.cache.outputs.cache-primary-key }}"
+                  echo "cache hit: ${{ steps.cache.outputs.cache-hit }}"
+                  cat cache_date__tee.txt || :
+            
