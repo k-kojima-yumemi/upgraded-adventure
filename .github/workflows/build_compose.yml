@@ -67,7 +67,7 @@ jobs:
             -
                 name: Call
                 if: steps.cache.outputs.cache-hit != 'true'
-                run: curl http://localhost:5000/v2/_catalog
+                run: curl -sS http://localhost:5000/v2/_catalog
             -
                 name: Build images
                 if: steps.cache.outputs.cache-hit != 'true'
