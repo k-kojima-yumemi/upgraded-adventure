@@ -6,6 +6,7 @@ on:
             - .github/workflows/build_compose.yml
             - compose.test2.yml
             - compose.test2.ci.yml
+    workflow_dispatch:
 
 jobs:
     build:
