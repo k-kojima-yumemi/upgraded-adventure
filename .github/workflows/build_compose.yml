@@ -61,7 +61,7 @@ jobs:
                 run: |
                     images=$(curl -sS http://localhost:5000/v2/_catalog)
                     echo "$images"
-                    for i in $(echo "$image" | jq '.repositories | []'); do
+                    for i in $(echo "$images" | jq -r '.repositories | .[]'); do
                         curl -sS "http://localhost:5000/v2/${i}/tags/list"
                     done
             -
@@ -88,7 +88,7 @@ jobs:
                 run: |
                     images=$(curl -sS http://localhost:5000/v2/_catalog)
                     echo "$images"
-                    for i in $(echo "$image" | jq '.repositories | []'); do
+                    for i in $(echo "$images" | jq -r '.repositories | .[]'); do
                         curl -sS "http://localhost:5000/v2/${i}/tags/list"
                     done
             -
