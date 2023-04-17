@@ -19,7 +19,11 @@ jobs:
             - 
                 name: Get hash
                 id: get-hash
-                run: echo "build_hash=${{ hashFiles('compose.test2.yml', 'compose.test2.ci.yml', 'Test2.Dockerfile') }}" >> "$GITHUB_OUTPUT"
+                run: |
+                    echo "build_hash=${{ hashFiles( \
+                    'compose.test2.yml', \
+                    'compose.test2.ci.yml', \
+                    'Test2.Dockerfile') }}" >> "$GITHUB_OUTPUT"
             - 
                 name: Check Cache of Docker Registry
                 id: cache
