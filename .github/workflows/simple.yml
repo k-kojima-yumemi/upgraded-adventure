@@ -43,3 +43,6 @@ jobs:
       - name: Show content if matched
         if: steps.cache.outputs.cache-hit == 'true'
         run: cat cache_date.txt
+      - name: Only manual
+        if: ${{ github.event_name == 'workflow_dispatch' }}
+        run: echo ${{github.event_name}}
